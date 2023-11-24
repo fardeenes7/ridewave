@@ -1,0 +1,525 @@
+{% extends 'index/base.html' %} {% block index %}
+
+<div class="bg-gray-50">
+    <div
+        class="max-w-2xl mx-auto pt-16 pb-24 px-4 sm:px-6 lg:max-w-7xl lg:px-8"
+    >
+        <h2 class="sr-only">Checkout</h2>
+        {% if error %}
+        <!-- This example requires Tailwind CSS v2.0+ -->
+        <div class="rounded-md bg-red-50 p-4">
+            <div class="flex">
+                <div class="flex-shrink-0">
+                    <!-- Heroicon name: solid/x-circle -->
+                    <svg
+                        class="h-5 w-5 text-red-400"
+                        xmlns="http://www.w3.org/2000/svg"
+                        viewBox="0 0 20 20"
+                        fill="currentColor"
+                        aria-hidden="true"
+                    >
+                        <path
+                            fill-rule="evenodd"
+                            d="M10 18a8 8 0 100-16 8 8 0 000 16zM8.707 7.293a1 1 0 00-1.414 1.414L8.586 10l-1.293 1.293a1 1 0 101.414 1.414L10 11.414l1.293 1.293a1 1 0 001.414-1.414L11.414 10l1.293-1.293a1 1 0 00-1.414-1.414L10 8.586 8.707 7.293z"
+                            clip-rule="evenodd"
+                        />
+                    </svg>
+                </div>
+                <div class="ml-3">
+                    <h3 class="text-sm font-medium text-red-800">{{error}}</h3>
+                </div>
+            </div>
+        </div>
+        {% endif %}
+        <form
+            class="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16"
+            method="POST"
+        >
+            {% csrf_token %}
+            <div>
+                <div>
+                    <h2 class="text-lg font-medium text-gray-900">
+                        Type of Rental
+                    </h2>
+
+                    <div class="mt-4">
+                        <label
+                            for="email-address"
+                            class="block text-sm font-medium text-gray-700"
+                            >Choose Trip Type</label
+                        >
+                        <div class="mt-1 sm:mt-1 sm:col-span-2">
+                            <fieldset class="grid grid-cols-3 gap-4">
+                                <div>
+                                    <input
+                                        type="radio"
+                                        name="type"
+                                        value="oneway"
+                                        id="type_oneway"
+                                        class="peer hidden [&:checked_+_label_svg]:block"
+                                        checked
+                                        onchange="setTripType('oneway')"
+                                    />
+
+                                    <label
+                                        for="type_oneway"
+                                        class="block cursor-pointer rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-sm hover:border-gray-200 peer-checked:border-lime-500 peer-checked:ring-1 peer-checked:ring-lime-500"
+                                    >
+                                        <div
+                                            class="flex items-center justify-between"
+                                        >
+                                            <p class="text-gray-700">One Way</p>
+
+                                            <svg
+                                                class="hidden h-5 w-5 text-lime-600"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                    clip-rule="evenodd"
+                                                />
+                                            </svg>
+                                        </div>
+
+                                        <p class="mt-1 text-gray-900">
+                                            {{vehicle.per_km}}&#2547; Per km
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <input
+                                        type="radio"
+                                        name="type"
+                                        value="roundtrip"
+                                        id="type_roundtrip"
+                                        class="peer hidden [&:checked_+_label_svg]:block"
+                                        onchange="setTripType('roundtrip')"
+                                    />
+
+                                    <label
+                                        for="type_roundtrip"
+                                        class="block cursor-pointer rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-sm hover:border-gray-200 peer-checked:border-lime-500 peer-checked:ring-1 peer-checked:ring-lime-500"
+                                    >
+                                        <div
+                                            class="flex items-center justify-between"
+                                        >
+                                            <p class="text-gray-700">
+                                                Round Trip
+                                            </p>
+
+                                            <svg
+                                                class="hidden h-5 w-5 text-lime-600"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                    clip-rule="evenodd"
+                                                />
+                                            </svg>
+                                        </div>
+
+                                        <p class="mt-1 text-gray-900">
+                                            {{vehicle.per_km}}&#2547; Per km
+                                        </p>
+                                    </label>
+                                </div>
+
+                                <div>
+                                    <input
+                                        type="radio"
+                                        name="type"
+                                        value="body"
+                                        id="type_body"
+                                        class="peer hidden [&:checked_+_label_svg]:block"
+                                        onchange="setTripType('body')"
+                                    />
+
+                                    <label
+                                        for="type_body"
+                                        class="block cursor-pointer rounded-lg border border-gray-100 bg-white p-4 text-sm font-medium shadow-sm hover:border-gray-200 peer-checked:border-lime-500 peer-checked:ring-1 peer-checked:ring-lime-500"
+                                    >
+                                        <div
+                                            class="flex items-center justify-between"
+                                        >
+                                            <p class="text-gray-700">
+                                                Per Day Basis(Without Driver)
+                                            </p>
+
+                                            <svg
+                                                class="hidden h-5 w-5 text-lime-600"
+                                                xmlns="http://www.w3.org/2000/svg"
+                                                viewBox="0 0 20 20"
+                                                fill="currentColor"
+                                            >
+                                                <path
+                                                    fill-rule="evenodd"
+                                                    d="M10 18a8 8 0 100-16 8 8 0 000 16zm3.707-9.293a1 1 0 00-1.414-1.414L9 10.586 7.707 9.293a1 1 0 00-1.414 1.414l2 2a1 1 0 001.414 0l4-4z"
+                                                    clip-rule="evenodd"
+                                                />
+                                            </svg>
+                                        </div>
+
+                                        <p class="mt-1 text-gray-900">
+                                            {{vehicle.per_day}}&#2547; Per Day
+                                        </p>
+                                    </label>
+                                </div>
+                            </fieldset>
+                        </div>
+                    </div>
+                </div>
+                <div
+                    id="km-container"
+                    class="mt-10 border-t border-gray-200 pt-10"
+                >
+                    <h2 class="text-lg font-medium text-gray-900">
+                        Destination information
+                    </h2>
+                    <p class="mt-1 text-gray-700 text-xs font-bold">
+                        Enter pickup and destination address to automatically
+                        calculate the fare.
+                    </p>
+
+                    <div
+                        class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4"
+                    >
+                        <div class="col-span-2">
+                            <label
+                                for="pickup"
+                                class="block text-sm font-medium text-gray-700"
+                                >Pickup From</label
+                            >
+                            <div class="mt-1 relative" id="pickup-container">
+                                <input
+                                    type="text"
+                                    id="pickup"
+                                    name="pickup"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 sm:text-sm"
+                                    onchange="calculateDistance()"
+                                    placeholder="Start typing to see suggestions"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="col-span-2">
+                            <label
+                                for="destination"
+                                class="block text-sm font-medium text-gray-700"
+                                >Destination</label
+                            >
+                            <div
+                                class="mt-1 relative"
+                                id="destination-container"
+                            >
+                                <input
+                                    type="text"
+                                    id="destination"
+                                    name="destination"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 sm:text-sm"
+                                    onchange="calculateDistance()"
+                                    placeholder="Enter destination to calculate fare"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="">
+                            <label
+                                for="distance"
+                                class="block text-sm font-medium text-gray-700"
+                                >Distance</label
+                            >
+                            <div class="mt-1">
+                                <input
+                                    type="text"
+                                    name="distance"
+                                    id="distance"
+                                    class="text-sm block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 sm:text-sm"
+                                    disabled
+                                    placeholder="Input pickup and destination address"
+                                />
+                                <input
+                                    type="hidden"
+                                    id="distance_value"
+                                    name="distance_value"
+                                    value="0"
+                                />
+                            </div>
+                        </div>
+
+                        <div class="">
+                            <label
+                                for="duration"
+                                class="block text-sm font-medium text-gray-700"
+                                >Approx Duration</label
+                            >
+                            <div class="mt-1">
+                                <input
+                                    type="text"
+                                    name="duration"
+                                    id="duration"
+                                    class="text-sm block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 sm:text-sm"
+                                    disabled
+                                    placeholder="Input pickup and destination address"
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="mt-10 border-t border-gray-200 pt-10">
+                    <h2 class="text-lg font-medium text-gray-900">
+                        Date information
+                    </h2>
+                    <p class="mt-1 text-gray-700 text-xs font-bold">
+                        Enter the date and time for your trip.
+                    </p>
+
+                    <div
+                        class="mt-4 grid grid-cols-1 gap-y-6 sm:grid-cols-2 sm:gap-x-4"
+                    >
+                        <div class="">
+                            <label
+                                for="start_date"
+                                class="block text-sm font-medium text-gray-700"
+                                >Pickup Date</label
+                            >
+                            <div class="mt-1 relative" id="pickup-container">
+                                <input
+                                    type="date"
+                                    id="start_date"
+                                    name="start_date"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 sm:text-sm"
+                                    onchange="updateSummary()"
+                                    min="{{today}}"
+                                    required
+                                />
+                            </div>
+                        </div>
+
+                        <div class="">
+                            <label
+                                for="start_time"
+                                class="block text-sm font-medium text-gray-700"
+                                >Pickup Time</label
+                            >
+                            <div class="mt-1 relative" id="pickup-container">
+                                <input
+                                    type="time"
+                                    id="start_time"
+                                    name="start_time"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 sm:text-sm"
+                                    onchange="updateSummary()"
+                                    required
+                                />
+                            </div>
+                        </div>
+                        <div class="hidden">
+                            <label
+                                for="end_date"
+                                class="block text-sm font-medium text-gray-700"
+                                >Return Date</label
+                            >
+                            <div class="mt-1 relative" id="enddate-container">
+                                <input
+                                    type="date"
+                                    id="end_date"
+                                    name="end_date"
+                                    min="{{today}}"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 sm:text-sm"
+                                    onchange="updateSummary()"
+                                />
+                            </div>
+                        </div>
+                        <div class="">
+                            <label
+                                for="days"
+                                class="block text-sm font-medium text-gray-700"
+                                >Days
+                                <span class="text-xs mt-2"
+                                    >(Max 500km Per Day)</span
+                                ></label
+                            >
+                            <div class="mt-1 relative" id="days-container">
+                                <input
+                                    type="number"
+                                    id="days"
+                                    name="days"
+                                    class="block w-full border-gray-300 rounded-md shadow-sm focus:ring-lime-500 focus:border-lime-500 sm:text-sm"
+                                    disabled
+                                />
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Order summary -->
+            <div class="mt-10 lg:mt-0">
+                <h2 class="text-lg font-medium text-gray-900">trip summary</h2>
+
+                <div
+                    class="mt-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+                >
+                    <ul role="list" class="divide-y divide-gray-200">
+                        <li class="flex py-6 px-4 sm:px-6">
+                            <div class="flex-shrink-0">
+                                <img
+                                    src="/media/{{vehicle.image}}"
+                                    alt="{{vehicle.model}}"
+                                    class="w-32 rounded-md"
+                                />
+                            </div>
+
+                            <div class="ml-6 flex-1 flex flex-col">
+                                <div class="flex">
+                                    <div class="min-w-0 flex-1">
+                                        <h4 class="text-sm">
+                                            <a
+                                                href="{% url 'vehicle_detail' vehicle.id %}"
+                                                target="_blank"
+                                                class="font-medium text-gray-700 hover:text-gray-800"
+                                            >
+                                                {{vehicle.brand}}
+                                                {{vehicle.model}}
+                                            </a>
+                                        </h4>
+                                        <p class="mt-1 text-sm text-gray-500">
+                                            {{vehicle.seats}} Seater
+                                        </p>
+                                    </div>
+                                </div>
+
+                                <div
+                                    class="flex-1 pt-2 flex items-end justify-between"
+                                >
+                                    <p
+                                        class="mt-1 text-sm font-medium text-gray-900"
+                                        id="unit_cost"
+                                    >
+                                        BDT {{vehicle.per_km}}/km
+                                    </p>
+                                </div>
+                            </div>
+                        </li>
+
+                        <!-- More products... -->
+                    </ul>
+                    <dl
+                        class="border-t border-gray-200 py-6 px-4 space-y-6 sm:px-6"
+                    >
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_unit_title">
+                                Per KM
+                            </dt>
+                            <dd
+                                class="text-sm font-medium text-gray-900"
+                                id="summary_unit"
+                            >
+                                BDT {{vehicle.per_km}}
+                            </dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_distance_title">
+                                Distance
+                            </dt>
+                            <dd
+                                class="text-sm font-medium text-gray-900"
+                                id="summary_distance"
+                            >
+                                00 KM
+                            </dd>
+                        </div>
+                        <div
+                            id="min_fare"
+                            class="flex items-center justify-between"
+                        >
+                            <dt class="text-sm">Base Fare</dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                BDT {{vehicle.min_fare}} Per Day
+                            </dd>
+                        </div>
+                        <div
+                            id="basic_driving"
+                            class="hidden flex items-center justify-between"
+                        >
+                            <dt class="text-sm">
+                                Basic Driving Facility (Includes 5 Litres of
+                                Fuel)
+                            </dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                BDT 700
+                            </dd>
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between border-t border-gray-200 pt-6"
+                        >
+                            <dt class="text-base font-medium">Total</dt>
+                            <dd
+                                class="text-base font-medium text-gray-900"
+                                id="summary_total"
+                            >
+                                0.00 BDT
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <div class="border-t border-gray-200 py-6 px-4 sm:px-6">
+                        <button
+                            type="submit"
+                            class="w-full bg-lime-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-base font-medium text-white hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-lime-500"
+                        >
+                            Confirm trip
+                        </button>
+                    </div>
+                </div>
+            </div>
+        </form>
+    </div>
+</div>
+<script>
+    function syncCalender(vehicle) {
+        var dateInput = document.getElementById("start_date");
+        var trips = [];
+        const totalDaysElement = document.getElementById("days");
+        url = `{% url 'api_trip_list' %}?vehicle=${vehicle}`;
+        fetch(url)
+            .then((res) => res.json())
+            .then((data) => {
+                trips = data.trips;
+                flatpickr(dateInput, {
+                    minDate: "today",
+                    weekNumbers: true,
+                    disable: data.trips.map((trip) => ({
+                        from: new Date(trip.start_date),
+                        to: new Date(trip.end_date),
+                    })),
+                    mode: "range",
+                    onChange: function (selectedDates, dateStr, instance) {
+                        if (selectedDates.length === 2) {
+                            const startDate = selectedDates[0];
+                            const endDate = selectedDates[1];
+                            const totalDays =
+                                Math.floor(
+                                    (endDate - startDate) /
+                                        (1000 * 60 * 60 * 24)
+                                ) + 1;
+                            totalDaysElement.value = totalDays;
+                        } else {
+                            totalDaysElement.value = 1;
+                        }
+                        updateSummary();
+                    },
+                });
+            });
+    }
+    syncCalender("{{vehicle.id}}");
+</script>
+{% include 'vehicle/script.html' %} {% endblock %}

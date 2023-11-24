@@ -1,0 +1,45 @@
+{% extends 'user/base.html' %} {% block user %}
+<section class="mt-4 py-8 px-4 md:px-8 lg:px-24">
+    <h2 class="font-bold text-3xl text-center">View All Your Trips</h2>
+    {% if trips.count == 0 %}
+    <p class="mt-8 text-center text-2xl">No trips.</p>
+    {% else %}
+    <div
+        class="lg:px-24 mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+    >
+        {% for trip in trips %}
+        <div class="group hover:border-2 border-black p-4 rounded-xl">
+            <a href="{% url 'trip_detail' trip.id %}">
+                <div
+                    class="relative p-4 h-52 w-full aspect-video bg-lime-100 flex flex-col items-center justify-center rounded-xl shadow-md overflow-hidden"
+                >
+                    <img
+                        src="/media/{{trip.vehicle.image}}"
+                        class="group-hover:scale-110 transform transition-all duration-500 ease-in-out object-cover rounded-xl"
+                        alt="{{trip.vehicle.brand}} {{trip.vehicle.model}}"
+                    />
+                </div>
+                <div class="pt-2">
+                    <span
+                        class="mt-2 inline-block bg-lime-400 text-xs font-bold px-3 py-2 rounded-md"
+                        >{{trip.status}}</span
+                    >
+                    <h3 class="mt-2 font-bold text-lg">
+                        {{trip.vehicle.brand}} {{trip.vehicle.model}}
+                    </h3>
+                    <!-- <div
+                    class="mt-2 flex items-center justify-start gap-4 text-gray-700 font-bold"
+                >
+                    <div class="bg-gray-200 rounded-md px-2 py-1">
+                        <i class="fa-solid fa-users mr-2"></i> {{vehicle.seats}}
+                    </div>
+                </div> -->
+                    <h4 class="mt-2">{{trip.start_date}}</h4>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endblock %}

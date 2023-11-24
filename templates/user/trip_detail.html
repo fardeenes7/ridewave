@@ -1,0 +1,154 @@
+{% extends 'user/base.html' %} {% block user %}
+
+<div class="bg-gray-50">
+    <div
+        class="max-w-2xl mx-auto pt-16 pb-24 px-4 sm:px-6 lg:max-w-7xl lg:px-8"
+    >
+        <h2 class="sr-only">Checkout</h2>
+
+        <div class="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
+            <div>
+                <div>
+                    <h2 class="text-4xl font-bold text-gray-900">
+                        {{trip.vehicle}}
+                    </h2>
+                </div>
+                <div class="mt-4 sm:mt-8 lg:mt-36">
+                    <img
+                        class="w-full h-auto"
+                        src="/media/{{trip.vehicle.image}}"
+                        alt=""
+                    />
+                </div>
+            </div>
+
+            <!-- Order summary -->
+            <div class="mt-10 lg:mt-0">
+                <h2 class="text-lg font-medium text-gray-900">Trip summary</h2>
+                <span
+                    class="mt-2 inline-block bg-lime-400 text-xs font-bold px-3 py-2 rounded-md"
+                    >{{trip.status}}</span
+                >
+                <div
+                    class="mt-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+                >
+                    <dl
+                        class="border-t border-gray-200 py-6 px-4 space-y-6 sm:px-6"
+                    >
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_unit_title">
+                                Trip Date
+                            </dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                {{trip.start_date}}
+                            </dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_unit_title">
+                                Pickup Time
+                            </dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                {{trip.start_time|date:'h:i A'}}
+                            </dd>
+                        </div>
+
+                        {% if trip.type == 'Body Rent' %}
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_unit_title">
+                                Return Date
+                            </dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                {{trip.end_date}}
+                            </dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm">Per Day</dt>
+                            <dd
+                                class="text-sm font-medium text-gray-900"
+                                id="summary_unit"
+                            >
+                                BDT {{trip.vehicle.per_day}}
+                            </dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_distance_title">
+                                Days
+                            </dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                {{trips.days}}
+                            </dd>
+                        </div>
+                        {% else %}
+                        <div class="grid grid-cols-4">
+                            <dt class="text-sm">Pickup address</dt>
+                            <dd></dd>
+                            <dd
+                                class="col-span-2 text-right text-sm font-medium text-gray-900"
+                                id="summary_unit"
+                            >
+                                {{trip.pickup}}
+                            </dd>
+                        </div>
+                        <div class="grid grid-cols-4">
+                            <dt class="text-sm" id="summary_unit_title">
+                                Destination
+                            </dt>
+                            <dd></dd>
+                            <dd
+                                class="col-span-2 text-right text-sm font-medium text-gray-900"
+                            >
+                                {{trip.destination}}
+                            </dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_unit_title">
+                                Rate Per KM
+                            </dt>
+                            <dd
+                                class="text-sm font-medium text-gray-900"
+                                id="summary_unit"
+                            >
+                                BDT {{trip.vehicle.per_km}}
+                            </dd>
+                        </div>
+
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_distance_title">
+                                Distance
+                            </dt>
+                            <dd
+                                class="text-sm font-medium text-gray-900"
+                                id="summary_distance"
+                            >
+                                {{trip.distance}}
+                            </dd>
+                        </div>
+                        {% endif %}
+                        <div
+                            class="flex items-center justify-between border-t border-gray-200 pt-6"
+                        >
+                            <dt class="text-base font-medium">Total</dt>
+                            <dd
+                                class="text-base font-medium text-gray-900"
+                                id="summary_total"
+                            >
+                                {{trip.total_cost}} BDT
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <div class="border-t border-gray-200 py-6 px-4 sm:px-6">
+                        <a
+                            href="{% url 'trip_cancel' trip.id %}"
+                            class="inline-block text-center w-full text-sm font-bold bg-lime-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-white hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-lime-500"
+                        >
+                            Cancel Trip
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

@@ -1,0 +1,666 @@
+<script>
+    let distance_value = 0;
+    let distance_text = "";
+    function calculateDistance() {
+        var origin = document.getElementById("pickup");
+        var destination = document.getElementById("destination");
+        console.log(origin.value.length, destination.value.length);
+        if (origin.value.length > 4 && destination.value.length > 4) {
+            document
+                .getElementById("distance")
+                .setAttribute("placeholder", "Loading...");
+            document
+                .getElementById("duration")
+                .setAttribute("placeholder", "Loading...");
+            url =
+                "https://api.distancematrix.ai/maps/api/distancematrix/json?origins=" +
+                origin.value +
+                "&destinations=" +
+                destination.value +
+                "&key=GE5nv8Bj5kxgSdmXnvuPzmrYi6fmpzZ3y0ceYBJA0FUCef9I2S0H7YfBd1WpXS5J";
+            fetch(url)
+                .then((response) => response.json())
+                .then((data) => {
+                    console.log(data);
+                    status = data.rows[0].elements[0].status;
+                    if (status == "ZERO_RESULTS") {
+                        alert("No route found, try changing the addresses");
+                        return;
+                    }
+                    distance_text = data.rows[0].elements[0].distance.text;
+                    distance_value = data.rows[0].elements[0].distance.value;
+
+                    var duration = data.rows[0].elements[0].duration.text;
+                    document.getElementById("distance").value = distance_text;
+                    document.getElementById("distance_value").value =
+                        distance_value;
+                    document.getElementById("duration").value = duration;
+
+                    origin.value = data.origin_addresses[0];
+                    destination.value = data.destination_addresses[0];
+                    updateSummary();
+                });
+        }
+    }
+    function setTripType(value) {
+        console.log("settriptype ", value);
+        oneway = document.getElementById("type_oneway");
+        roundtrip = document.getElementById("type_roundtrip");
+        body = document.getElementById("type_body");
+        unit_cost = document.getElementById("unit_cost");
+        km_container = document.getElementById("km-container");
+        // day_container = document.getElementById("day-container");
+
+        if (value == "oneway") {
+            oneway.checked = true;
+            roundtrip.checked = false;
+            body.checked = false;
+            unit_cost.innerHTML = "{{vehicle.per_km}}&#2547; Per Km";
+            // day_container.classList.add("hidden");
+            km_container.classList.remove("hidden");
+            document.getElementById("pickup").setAttribute("required", "true");
+            document
+                .getElementById("destination")
+                .setAttribute("required", "true");
+            document.getElementById("end_date").removeAttribute("required");
+            document.getElementById("min_fare").classList.remove("hidden");
+            document.getElementById("basic_driving").classList.add("hidden");
+        } else if (value == "roundtrip") {
+            oneway.checked = false;
+            roundtrip.checked = true;
+            body.checked = false;
+            unit_cost.innerHTML = "{{vehicle.per_km}}&#2547; Per Km";
+            // day_container.classList.add("hidden");
+            km_container.classList.remove("hidden");
+            document.getElementById("pickup").setAttribute("required", "true");
+            document
+                .getElementById("destination")
+                .setAttribute("required", "true");
+            document.getElementById("end_date").removeAttribute("required");
+            document.getElementById("min_fare").classList.remove("hidden");
+            document.getElementById("basic_driving").classList.add("hidden");
+        } else if (value == "body") {
+            oneway.checked = false;
+            roundtrip.checked = false;
+            body.checked = true;
+            unit_cost.innerHTML = "{{vehicle.per_day}}&#2547; Per Day";
+            // day_container.classList.remove("hidden");
+            km_container.classList.add("hidden");
+            // document.getElementById("pickup").setAttribute("required", "false");
+            // document.getElementById("destination").setAttribute("required", "false");
+            // document.getElementById("end_date").setAttribute("required", "false");
+            document.getElementById("pickup").removeAttribute("required");
+            document.getElementById("destination").removeAttribute("required");
+            document.getElementById("end_date").removeAttribute("required");
+            document.getElementById("min_fare").classList.add("hidden");
+            document.getElementById("basic_driving").classList.remove("hidden");
+        }
+        updateSummary();
+    }
+
+    setTripType("oneway");
+    function updateSummary() {
+        type = document.querySelector('input[name="type"]:checked').value;
+        start_date = new Date(document.getElementById("start_date").value);
+        end_date = new Date(document.getElementById("end_date").value);
+        var min_fare = parseInt("{{vehicle.min_fare}}");
+        // days = (end_date - start_date) / (1000 * 3600 * 24) +1;
+        days = document.getElementById("days").value;
+        if (type == "oneway") {
+            days = Math.ceil(distance_value / (500 * 1000));
+            document.getElementById("days").value = days;
+            cost =
+                (distance_value * parseInt("{{vehicle.per_km}}")) / 1000 +
+                days * min_fare;
+            document.getElementById("summary_unit_title").innerHTML = "Per Km";
+            document.getElementById("summary_unit").innerHTML =
+                "{{vehicle.per_km}}&#2547;";
+            document.getElementById("summary_distance_title").innerHTML =
+                "Distance";
+            document.getElementById("summary_distance").innerHTML =
+                distance_text;
+            document.getElementById("summary_total").innerHTML =
+                cost + "&#2547;";
+        } else if (type == "roundtrip") {
+            days = Math.ceil(distance_value / (500 * 1000)) * 2;
+            document.getElementById("days").value = days;
+            cost =
+                (distance_value * parseInt("{{vehicle.per_km}}") * 2) / 1000 +
+                days * min_fare;
+            document.getElementById("summary_unit_title").innerHTML = "Per Km";
+            document.getElementById("summary_unit").innerHTML =
+                "{{vehicle.per_km}}&#2547;";
+            document.getElementById("summary_distance_title").innerHTML =
+                "Distance";
+            document.getElementById("summary_distance").innerHTML =
+                distance_text;
+            document.getElementById("summary_total").innerHTML =
+                cost + "&#2547;";
+        } else if (type == "body") {
+            cost = days * parseInt("{{vehicle.per_day}}") + 700;
+            console.log(cost);
+            document.getElementById("summary_unit_title").innerHTML = "Per Day";
+            document.getElementById("summary_unit").innerHTML =
+                "{{vehicle.per_day}}&#2547;";
+            document.getElementById("summary_distance_title").innerHTML =
+                "Days";
+            document.getElementById("summary_distance").innerHTML = days;
+            document.getElementById("summary_total").innerHTML =
+                cost + "&#2547;";
+        }
+    }
+</script>
+
+<script>
+    function pickupAutocomplete() {
+        const MIN_ADDRESS_LENGTH = 3;
+        const DEBOUNCE_DELAY = 300;
+        let containerElement = document.getElementById("pickup-container");
+        let inputContainerElement = document.getElementById("pickup-container");
+
+        inputElement = document.getElementById("pickup");
+
+        // add input field clear button
+        const clearButton = document.createElement("div");
+        clearButton.innerHTML = "<i class='fas fa-times'></i>";
+        clearButton.classList.add(
+            "clear-button",
+            "absolute",
+            "top-2",
+            "right-4"
+        );
+        // addIcon(clearButton);
+        clearButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            inputElement.value = "";
+            callback(null);
+            clearButton.classList.remove("visible");
+            closeDropDownList();
+        });
+        inputContainerElement.appendChild(clearButton);
+
+        /* We will call the API with a timeout to prevent unneccessary API activity.*/
+        let currentTimeout;
+
+        /* Save the current request promise reject function. To be able to cancel the promise when a new request comes */
+        let currentPromiseReject;
+
+        /* Focused item in the autocomplete list. This variable is used to navigate with buttons */
+        let focusedItemIndex;
+
+        /* Process a user input: */
+        inputElement.addEventListener("input", function (e) {
+            const currentValue = this.value;
+
+            /* Close any already open dropdown list */
+            closeDropDownList();
+
+            // Cancel previous timeout
+            if (currentTimeout) {
+                clearTimeout(currentTimeout);
+            }
+
+            // Cancel previous request promise
+            if (currentPromiseReject) {
+                currentPromiseReject({
+                    canceled: true,
+                });
+            }
+
+            if (!currentValue) {
+                clearButton.classList.remove("visible");
+            }
+
+            // Show clearButton when there is a text
+            clearButton.classList.add("visible");
+
+            // Skip empty or short address strings
+            if (!currentValue || currentValue.length < MIN_ADDRESS_LENGTH) {
+                return false;
+            }
+
+            /* Call the Address Autocomplete API with a delay */
+            currentTimeout = setTimeout(() => {
+                currentTimeout = null;
+
+                /* Create a new promise and send geocoding request */
+                const promise = new Promise((resolve, reject) => {
+                    currentPromiseReject = reject;
+
+                    // The API Key provided is restricted to JSFiddle website
+                    // Get your own API Key on https://myprojects.geoapify.com
+                    const apiKey = "a85f852e2abc426caf22f59a234a197d";
+
+                    var url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
+                        currentValue
+                    )}&format=json&limit=5&apiKey=${apiKey}`;
+
+                    fetch(url).then((response) => {
+                        currentPromiseReject = null;
+
+                        // check if the call was successful
+                        if (response.ok) {
+                            response.json().then((data) => resolve(data));
+                        } else {
+                            response.json().then((data) => reject(data));
+                        }
+                    });
+                });
+
+                promise.then(
+                    (data) => {
+                        // here we get address suggestions
+                        currentItems = data.results;
+
+                        /*create a DIV element that will contain the items (values):*/
+                        const autocompleteItemsElement =
+                            document.createElement("div");
+                        autocompleteItemsElement.setAttribute(
+                            "class",
+                            "pickup-autocomplete-items"
+                        );
+                        autocompleteItemsElement.classList.add(
+                            "absolute",
+                            "w-full",
+                            "bg-white",
+                            "shadow-lg",
+                            "rounded-lg",
+                            "py-2",
+                            "overflow-hidden",
+                            "z-10"
+                        );
+                        inputContainerElement.appendChild(
+                            autocompleteItemsElement
+                        );
+
+                        /* For each item in the results */
+                        data.results.forEach((result, index) => {
+                            /* Create a DIV element for each element: */
+                            const itemElement = document.createElement("div");
+                            /* Set formatted address as item value */
+                            itemElement.innerHTML = result.formatted;
+                            itemElement.setAttribute("class", "px-4 py-2");
+                            itemElement.classList.add(
+                                "hover:bg-gray-100",
+                                "cursor-pointer",
+                                "text-sm"
+                            );
+                            autocompleteItemsElement.appendChild(itemElement);
+
+                            /* Set the value for the autocomplete text field and notify: */
+                            itemElement.addEventListener("click", function (e) {
+                                inputElement.value =
+                                    currentItems[index].formatted;
+                                // callback(currentItems[index]);
+                                /* Close the list of autocompleted values: */
+                                closeDropDownList();
+                            });
+                        });
+                    },
+                    (err) => {
+                        if (!err.canceled) {
+                            console.log(err);
+                        }
+                    }
+                );
+            }, DEBOUNCE_DELAY);
+        });
+
+        /* Add support for keyboard navigation */
+        inputElement.addEventListener("keydown", function (e) {
+            var autocompleteItemsElement = containerElement.querySelector(
+                ".pickup-autocomplete-items"
+            );
+            if (autocompleteItemsElement) {
+                var itemElements =
+                    autocompleteItemsElement.getElementsByTagName("div");
+                if (e.keyCode == 40) {
+                    e.preventDefault();
+                    /*If the arrow DOWN key is pressed, increase the focusedItemIndex variable:*/
+                    focusedItemIndex =
+                        focusedItemIndex !== itemElements.length - 1
+                            ? focusedItemIndex + 1
+                            : 0;
+                    /*and and make the current item more visible:*/
+                    setActive(itemElements, focusedItemIndex);
+                } else if (e.keyCode == 38) {
+                    e.preventDefault();
+
+                    /*If the arrow UP key is pressed, decrease the focusedItemIndex variable:*/
+                    focusedItemIndex =
+                        focusedItemIndex !== 0
+                            ? focusedItemIndex - 1
+                            : (focusedItemIndex = itemElements.length - 1);
+                    /*and and make the current item more visible:*/
+                    setActive(itemElements, focusedItemIndex);
+                } else if (e.keyCode == 13) {
+                    /* If the ENTER key is pressed and value as selected, close the list*/
+                    e.preventDefault();
+                    if (focusedItemIndex > -1) {
+                        closeDropDownList();
+                    }
+                }
+            } else {
+                if (e.keyCode == 40) {
+                    /* Open dropdown list again */
+                    var event = document.createEvent("Event");
+                    event.initEvent("input", true, true);
+                    inputElement.dispatchEvent(event);
+                }
+            }
+        });
+
+        function setActive(items, index) {
+            if (!items || !items.length) return false;
+
+            for (var i = 0; i < items.length; i++) {
+                items[i].classList.remove("autocomplete-active");
+            }
+
+            /* Add class "autocomplete-active" to the active element*/
+            items[index].classList.add("autocomplete-active");
+
+            // Change input value and notify
+            inputElement.value = currentItems[index].formatted;
+            callback(currentItems[index]);
+        }
+
+        function closeDropDownList() {
+            const autocompleteItemsElement =
+                inputContainerElement.querySelector(
+                    ".pickup-autocomplete-items"
+                );
+            if (autocompleteItemsElement) {
+                inputContainerElement.removeChild(autocompleteItemsElement);
+            }
+
+            focusedItemIndex = -1;
+        }
+
+        function addIcon(buttonElement) {
+            const svgElement = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "svg"
+            );
+            svgElement.setAttribute("viewBox", "0 0 24 24");
+            svgElement.setAttribute("height", "24");
+
+            const iconElement = document.createElementNS(
+                "http://www.w3.org/2000/svg",
+                "path"
+            );
+            iconElement.setAttribute(
+                "d",
+                "M19 6.41L17.59 5 12 10.59 6.41 5 5 6.41 10.59 12 5 17.59 6.41 19 12 13.41 17.59 19 19 17.59 13.41 12z"
+            );
+            iconElement.setAttribute("fill", "currentColor");
+            svgElement.appendChild(iconElement);
+            buttonElement.appendChild(svgElement);
+        }
+
+        /* Close the autocomplete dropdown when the document is clicked.
+      Skip, when a user clicks on the input field */
+        document.addEventListener("click", function (e) {
+            if (e.target !== inputElement) {
+                closeDropDownList();
+            } else if (
+                !containerElement.querySelector(".pickup-autocomplete-items")
+            ) {
+                // open dropdown list again
+                var event = document.createEvent("Event");
+                event.initEvent("input", true, true);
+                inputElement.dispatchEvent(event);
+            }
+        });
+    }
+
+    pickupAutocomplete();
+</script>
+
+<script>
+    function destinationAutocomplete() {
+        const MIN_ADDRESS_LENGTH = 3;
+        const DEBOUNCE_DELAY = 300;
+        let containerElement = document.getElementById("destination-container");
+        let inputContainerElement = document.getElementById(
+            "destination-container"
+        );
+        destinationElement = document.getElementById("destination");
+
+        // add input field clear button
+        const clearButton = document.createElement("div");
+        clearButton.innerHTML = "<i class='fas fa-times'></i>";
+        clearButton.classList.add(
+            "clear-button",
+            "absolute",
+            "top-2",
+            "right-4"
+        );
+        // addIcon(clearButton);
+        clearButton.addEventListener("click", (e) => {
+            e.stopPropagation();
+            destinationElement.value = "";
+            callback(null);
+            clearButton.classList.remove("visible");
+            closeDropDownList();
+        });
+        inputContainerElement.appendChild(clearButton);
+
+        /* We will call the API with a timeout to prevent unneccessary API activity.*/
+        let currentTimeout;
+
+        /* Save the current request promise reject function. To be able to cancel the promise when a new request comes */
+        let currentPromiseReject;
+
+        /* Focused item in the autocomplete list. This variable is used to navigate with buttons */
+        let focusedItemIndex;
+
+        /* Process a user input: */
+        destinationElement.addEventListener("input", function (e) {
+            const currentValue = this.value;
+
+            /* Close any already open dropdown list */
+            closeDropDownList();
+
+            // Cancel previous timeout
+            if (currentTimeout) {
+                clearTimeout(currentTimeout);
+            }
+
+            // Cancel previous request promise
+            if (currentPromiseReject) {
+                currentPromiseReject({
+                    canceled: true,
+                });
+            }
+
+            if (!currentValue) {
+                clearButton.classList.remove("visible");
+            }
+
+            // Show clearButton when there is a text
+            clearButton.classList.add("visible");
+
+            // Skip empty or short address strings
+            if (!currentValue || currentValue.length < MIN_ADDRESS_LENGTH) {
+                return false;
+            }
+
+            /* Call the Address Autocomplete API with a delay */
+            currentTimeout = setTimeout(() => {
+                currentTimeout = null;
+
+                /* Create a new promise and send geocoding request */
+                const promise = new Promise((resolve, reject) => {
+                    currentPromiseReject = reject;
+
+                    // The API Key provided is restricted to JSFiddle website
+                    // Get your own API Key on https://myprojects.geoapify.com
+                    const apiKey = "6dc7fb95a3b246cfa0f3bcef5ce9ed9a";
+
+                    var url = `https://api.geoapify.com/v1/geocode/autocomplete?text=${encodeURIComponent(
+                        currentValue
+                    )}&format=json&limit=5&apiKey=${apiKey}`;
+
+                    fetch(url).then((response) => {
+                        currentPromiseReject = null;
+
+                        // check if the call was successful
+                        if (response.ok) {
+                            response.json().then((data) => resolve(data));
+                        } else {
+                            response.json().then((data) => reject(data));
+                        }
+                    });
+                });
+
+                promise.then(
+                    (data) => {
+                        // here we get address suggestions
+                        currentItems = data.results;
+
+                        /*create a DIV element that will contain the items (values):*/
+                        const autocompleteItemsElement =
+                            document.createElement("div");
+                        autocompleteItemsElement.setAttribute(
+                            "class",
+                            "destination-autocomplete-items"
+                        );
+                        autocompleteItemsElement.classList.add(
+                            "absolute",
+                            "w-full",
+                            "bg-white",
+                            "shadow-lg",
+                            "rounded-lg",
+                            "py-2",
+                            "overflow-hidden",
+                            "z-10"
+                        );
+                        inputContainerElement.appendChild(
+                            autocompleteItemsElement
+                        );
+
+                        /* For each item in the results */
+                        data.results.forEach((result, index) => {
+                            /* Create a DIV element for each element: */
+                            const itemElement = document.createElement("div");
+                            /* Set formatted address as item value */
+                            itemElement.innerHTML = result.formatted;
+                            itemElement.setAttribute("class", "px-4 py-2");
+                            itemElement.classList.add(
+                                "hover:bg-gray-100",
+                                "cursor-pointer",
+                                "text-sm"
+                            );
+                            autocompleteItemsElement.appendChild(itemElement);
+
+                            /* Set the value for the autocomplete text field and notify: */
+                            itemElement.addEventListener("click", function (e) {
+                                destinationElement.value =
+                                    currentItems[index].formatted;
+                                // callback(currentItems[index]);
+                                /* Close the list of autocompleted values: */
+                                closeDropDownList();
+                            });
+                        });
+                    },
+                    (err) => {
+                        if (!err.canceled) {
+                            console.log(err);
+                        }
+                    }
+                );
+            }, DEBOUNCE_DELAY);
+        });
+
+        /* Add support for keyboard navigation */
+        destinationElement.addEventListener("keydown", function (e) {
+            var autocompleteItemsElement = containerElement.querySelector(
+                ".destination-autocomplete-items"
+            );
+            if (autocompleteItemsElement) {
+                var itemElements =
+                    autocompleteItemsElement.getElementsByTagName("div");
+                if (e.keyCode == 40) {
+                    e.preventDefault();
+                    /*If the arrow DOWN key is pressed, increase the focusedItemIndex variable:*/
+                    focusedItemIndex =
+                        focusedItemIndex !== itemElements.length - 1
+                            ? focusedItemIndex + 1
+                            : 0;
+                    /*and and make the current item more visible:*/
+                    setActive(itemElements, focusedItemIndex);
+                } else if (e.keyCode == 38) {
+                    e.preventDefault();
+
+                    /*If the arrow UP key is pressed, decrease the focusedItemIndex variable:*/
+                    focusedItemIndex =
+                        focusedItemIndex !== 0
+                            ? focusedItemIndex - 1
+                            : (focusedItemIndex = itemElements.length - 1);
+                    /*and and make the current item more visible:*/
+                    setActive(itemElements, focusedItemIndex);
+                } else if (e.keyCode == 13) {
+                    /* If the ENTER key is pressed and value as selected, close the list*/
+                    e.preventDefault();
+                    if (focusedItemIndex > -1) {
+                        closeDropDownList();
+                    }
+                }
+            } else {
+                if (e.keyCode == 40) {
+                    /* Open dropdown list again */
+                    var event = document.createEvent("Event");
+                    event.initEvent("input", true, true);
+                    destinationElement.dispatchEvent(event);
+                }
+            }
+        });
+
+        function setActive(items, index) {
+            if (!items || !items.length) return false;
+
+            for (var i = 0; i < items.length; i++) {
+                items[i].classList.remove("autocomplete-active");
+            }
+
+            /* Add class "autocomplete-active" to the active element*/
+            items[index].classList.add("autocomplete-active");
+
+            // Change input value and notify
+            destinationElement.value = currentItems[index].formatted;
+            callback(currentItems[index]);
+        }
+
+        function closeDropDownList() {
+            const autocompleteItemsElement =
+                inputContainerElement.querySelector(
+                    ".destination-autocomplete-items"
+                );
+            if (autocompleteItemsElement) {
+                inputContainerElement.removeChild(autocompleteItemsElement);
+            }
+
+            focusedItemIndex = -1;
+        }
+
+        /* Close the autocomplete dropdown when the document is clicked.
+      Skip, when a user clicks on the input field */
+        document.addEventListener("click", function (e) {
+            if (e.target !== destinationElement) {
+                closeDropDownList();
+            } else if (
+                !containerElement.querySelector(
+                    ".destination-autocomplete-items"
+                )
+            ) {
+                // open dropdown list again
+                var event = document.createEvent("Event");
+                event.initEvent("input", true, true);
+                destinationElement.dispatchEvent(event);
+            }
+        });
+    }
+
+    destinationAutocomplete();
+</script>

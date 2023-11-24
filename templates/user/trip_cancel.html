@@ -1,0 +1,107 @@
+{% extends 'user/base.html' %} {% block user %}
+
+<div class="bg-gray-50">
+    <div
+        class="max-w-2xl mx-auto pt-16 pb-24 px-4 sm:px-6 lg:max-w-7xl lg:px-8"
+    >
+        <h2 class="sr-only">Checkout</h2>
+
+        <div class="lg:grid lg:grid-cols-2 lg:gap-x-12 xl:gap-x-16">
+            <div>
+                <div>
+                    <h2 class="text-4xl font-bold text-gray-900">
+                        {{trip.vehicle}}
+                    </h2>
+                </div>
+                <div class="mt-4 sm:mt-8 lg:mt-36">
+                    <img
+                        class="w-full h-auto"
+                        src="/media/{{trip.vehicle.image}}"
+                        alt=""
+                    />
+                </div>
+            </div>
+            <div class="mt-10 lg:mt-0">
+                <h2 class="text-lg font-medium text-gray-900">
+                    Trip Cancelation
+                </h2>
+                <span
+                    class="mt-2 inline-block bg-lime-400 text-xs font-bold px-3 py-2 rounded-md"
+                    >{{trip.status}}</span
+                >
+                <div
+                    class="mt-4 bg-white border border-gray-200 rounded-lg shadow-sm"
+                >
+                    <dl
+                        class="border-t border-gray-200 py-6 px-4 space-y-6 sm:px-6"
+                    >
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_unit_title">
+                                Trip Status
+                            </dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                {{trip.status}}
+                            </dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_unit_title">
+                                Trip Date
+                            </dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                {{trip.start_date}}
+                            </dd>
+                        </div>
+                        <div class="flex items-center justify-between">
+                            <dt class="text-sm" id="summary_unit_title">
+                                Pickup Time
+                            </dt>
+                            <dd class="text-sm font-medium text-gray-900">
+                                {{trip.start_time|date:'h:i A'}}
+                            </dd>
+                        </div>
+
+                        <div
+                            class="flex items-center justify-between border-t border-gray-200 pt-6"
+                        >
+                            <dt class="text-base font-medium">Total Cost</dt>
+                            <dd
+                                class="text-base font-medium text-gray-900"
+                                id="summary_total"
+                            >
+                                {{trip.total_cost}} BDT
+                            </dd>
+                        </div>
+                    </dl>
+
+                    <div class="border-t border-gray-200 py-6 px-4 sm:px-6">
+                        <form method="POST">
+                            {% csrf_token %} {% if can_cancel %}
+                            <p class="text-red-500 font-bold text-sm">
+                                Are you sure want to cancel this trip?
+                            </p>
+                            <button
+                                type="submit"
+                                class="mt-4 w-full text-sm font-bold bg-lime-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-white hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-lime-500"
+                            >
+                                Cancel Trip
+                            </button>
+                            {% else %}
+                            <p class="text-red-500 font-bold text-sm">
+                                Trip cancellation unavailable because {{reason}}
+                            </p>
+                            <button
+                                disabled
+                                class="mt-4 w-full text-sm font-bold bg-lime-600 border border-transparent rounded-md shadow-sm py-3 px-4 text-white hover:bg-lime-700 focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-offset-gray-50 focus:ring-lime-500"
+                            >
+                                Cancel Trip
+                            </button>
+                            {% endif %}
+                        </form>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+{% endblock %}

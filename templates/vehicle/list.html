@@ -1,0 +1,50 @@
+{% extends 'index/base.html' %} {% block index %} {% for type in types %}
+<section class="py-8 px-4 md:px-8 lg:px-24">
+    <h2 class="font-bold text-5xl text-center">View All {{type.name}}s</h2>
+    {% if type.vehicles.count == 0 %}
+    <p class="mt-8 text-center text-2xl">
+        No {{type.name}}s available at this moment.
+    </p>
+    {% else %}
+    <div
+        class="lg:px-24 mt-8 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4"
+    >
+        {% for vehicle in type.vehicles.all %}
+        <div
+            class="group border-2 border-transparent hover:border-black p-4 rounded-xl"
+        >
+            <a href="{% url 'vehicle_detail' vehicle.id %}">
+                <div
+                    class="relative p-4 h-52 w-full aspect-video bg-lime-100 flex flex-col items-center justify-center rounded-xl shadow-md overflow-hidden"
+                >
+                    <img
+                        src="/media/{{vehicle.image}}"
+                        class="group-hover:scale-110 transform transition-all duration-500 ease-in-out object-cover rounded-xl"
+                        alt="{{vehicle.brand}} {{vehicle.model}}"
+                    />
+                </div>
+                <div class="pt-6">
+                    <h3 class="font-bold text-lg">
+                        {{vehicle.brand}} {{vehicle.model}}
+                    </h3>
+                    <!-- <div
+                    class="mt-2 flex items-center justify-start gap-4 text-gray-700 font-bold"
+                >
+                    <div class="bg-gray-200 rounded-md px-2 py-1">
+                        <i class="fa-solid fa-users mr-2"></i> {{vehicle.seats}}
+                    </div>
+                </div> -->
+                    <h4 class="mt-2">
+                        Starts from
+                        <span class="font-bold text-xl"
+                            >&#2547; {{vehicle.min_fare}}</span
+                        >
+                    </h4>
+                </div>
+            </a>
+        </div>
+        {% endfor %}
+    </div>
+    {% endif %}
+</section>
+{% endfor %} {% endblock %}
